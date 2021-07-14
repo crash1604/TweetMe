@@ -6,7 +6,7 @@ from .models import Tweet
 
 def tweetlistview(request, *args, **kwargs):
     qs= Tweet.objects.all()
-    tweetList=[ {"id":x.id, "content":x.content} for x in qs]
+    tweetList=[ {"id":x.id, "content":x.content, "likes":12 } for x in qs]
     data= {
         "isUser": False,
         "response": tweetList }

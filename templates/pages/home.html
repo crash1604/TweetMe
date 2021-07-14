@@ -14,6 +14,15 @@
     const url="tweets"
     const responseType="json"
 
+    function handleDidLike(tweet_id, currentCount){ 
+         console.log(tweet_id,currentCount)
+          
+    }
+
+    function LikeBtn(tweet){
+        return "<Button class='btn btn-primary' onclick=handleDidLike("+ tweet.id +","+ tweet.likes +")> "+tweet.likes +" Like </Button>"
+    }
+
     xhr.responseType=responseType
     xhr.open(method,url)
     xhr.onload=function(){
@@ -26,7 +35,7 @@
         {
             console.log(i)
             console.log(listedItems[i].content) 
-            var currentItem = "<div class='mb-4 text-primary'><h1>"+listedItems[i].id + "</h1> <p>" +listedItems[i].content + "</p></div>"
+            var currentItem = "<div class='mb-4 text-primary'><h1>"+listedItems[i].id + "</h1> <p id ='"+ listedItems[i].id +"'>" +listedItems[i].content + "</p> <div class='btn-grp'>"+   LikeBtn(listedItems[i]) +"</div</div>"
             FinalTweetStr+=currentItem 
         }
         tweetsElement.innerHTML=FinalTweetStr  
