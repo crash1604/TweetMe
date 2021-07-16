@@ -14,13 +14,15 @@ def tweetlistview(request, *args, **kwargs):
     return JsonResponse(data)  
 
 def tweetCreateView(request, *args, **kwargs):
+    form= TweetForm(request.POST or None)
     if request.method == "POST":
-        form= TweetForm(request.POST)
         if form.is_valid():
-            obj=form.save(commit=False)
+            obj= form.save(commit=False)
             obj.save()
             form = TweetForm() 
-    return render(request,'components/form.html', context={"form": form})
+        return render(request,'components/form.html', context={"form": form})
+    if request.method == "GET":
+        return render(request,'components/form.html', context={"form":form})
 
 def homeview(request, *args,**kwargs):
     # return HttpResponse('<H1>Foo blah </H1>')
