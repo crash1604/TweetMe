@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, Http404
 
 from .models import Tweet 
+from .forms import TweetForm 
 
 def tweetlistview(request, *args, **kwargs):
     qs= Tweet.objects.all()
@@ -11,6 +12,15 @@ def tweetlistview(request, *args, **kwargs):
         "isUser": False,
         "response": tweetList }
     return JsonResponse(data)  
+
+def tweetCreateView(request, *args, **kwargs):
+    if request.method == "POST":
+        form= TweetForm(request.POST)
+        if form.is_valid():
+            obj=form.save(commit=False)
+            obj.save()
+            form = TweetForm() 
+    return render(request,'components/form.html', context={"form": form})
 
 def homeview(request, *args,**kwargs):
     # return HttpResponse('<H1>Foo blah </H1>')
