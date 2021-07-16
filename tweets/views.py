@@ -1,6 +1,6 @@
 from typing import ContextManager
-from django.shortcuts import render 
-from django.http import HttpResponse, JsonResponse, Http404
+from django.shortcuts import render, redirect 
+from django.http import HttpResponse, JsonResponse, Http404, HttpResponseRedirect
 
 from .models import Tweet 
 from .forms import TweetForm 
@@ -14,11 +14,15 @@ def tweetlistview(request, *args, **kwargs):
     return JsonResponse(data)  
 
 def tweetCreateView(request, *args, **kwargs):
+    next_url=request.POST.get("next") or None
+    print(next_url)
     form= TweetForm(request.POST or None)
     if request.method == "POST":
         if form.is_valid():
             obj= form.save(commit=False)
             obj.save()
+            if next_url != None:
+                return redirect(next_url )
             form = TweetForm() 
         return render(request,'components/form.html', context={"form": form})
     if request.method == "GET":
