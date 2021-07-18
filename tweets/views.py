@@ -11,7 +11,7 @@ ALLOWED_HOSTS = settings.ALLOWED_HOSTS
 
 def tweetlistview(request, *args, **kwargs):
     qs= Tweet.objects.all()
-    tweetList=[ {"id":x.id, "content":x.content, "likes":12 } for x in qs]
+    tweetList=[ x.serialize() for x in qs]
     data= {
         "isUser": False,
         "response": tweetList }
@@ -20,11 +20,15 @@ def tweetlistview(request, *args, **kwargs):
 def tweetCreateView(request, *args, **kwargs):
     next_url=request.POST.get("next") or None
     print(next_url)
+   
     form= TweetForm(request.POST or None)
     if request.method == "POST":
         if form.is_valid():
             obj= form.save(commit=False)
             obj.save()
+            if request.is_ajax():
+                print("ajax",request.is_ajax())
+                return JsonResponse(obj.serialize(), status=201) #201 is status code for succesfully created items
             if next_url != None and is_safe_url(next_url, ALLOWED_HOSTS):
                 return redirect(next_url)
             form = TweetForm() 
