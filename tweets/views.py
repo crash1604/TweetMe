@@ -10,6 +10,9 @@ from .forms import TweetForm
 ALLOWED_HOSTS = settings.ALLOWED_HOSTS 
 
 def tweetlistview(request, *args, **kwargs):
+    if not request.user.is_authenticated:
+        if request.is_ajax():
+            return JsonResponse({}, status=401)
     qs= Tweet.objects.all()
     tweetList=[ x.serialize() for x in qs]
     data= {
@@ -18,24 +21,29 @@ def tweetlistview(request, *args, **kwargs):
     return JsonResponse(data)  
 
 def tweetCreateView(request, *args, **kwargs):
-    next_url=request.POST.get("next") or None
-    print(next_url)
-   
-    form= TweetForm(request.POST or None)
-    if request.method == "POST":
-        if form.is_valid():
-            obj= form.save(commit=False)
-            obj.save()
-            if request.is_ajax():
-                print("ajax",request.is_ajax())
-                return JsonResponse(obj.serialize(), status=201) #201 is status code for succesfully created items
-            if next_url != None and is_safe_url(next_url, ALLOWED_HOSTS):
-                return redirect(next_url)
-            form = TweetForm() 
-        return render(request,'components/form.html', context={"form": form})
-    if request.method == "GET":
-        return render(request,'components/form.html', context={"form":form})
-
+    user = request.user
+    if not request.user.is_authenticated:
+        user = None
+        if request.is_ajax():
+            return JsonResponse({}, status=401)
+        return redirect(settings.LOGIN_URL)
+    form = TweetForm(request.POST or None)
+    next_url = request.POST.get("next") or None
+    if form.is_valid():
+        obj = form.save(commit=False)
+        # do other form related logic
+        obj.user = user
+        obj.save()
+        if request.is_ajax():
+            return JsonResponse(obj.serialize(), status=201) # 201 == created items
+        if next_url != None and is_safe_url(next_url, ALLOWED_HOSTS):
+            return redirect(next_url)
+        form = TweetForm()
+    if form.errors:
+        if request.is_ajax():
+            return JsonResponse(form.errors, status=400)
+    return render(request, 'components/form.html', context={"form": form})
+    
 def homeview(request, *args,**kwargs):
     # return HttpResponse('<H1>Foo blah </H1>')
     return render(request, 'pages/home.html', context={}, status=200) 
