@@ -27,9 +27,10 @@ SECRET_KEY = 'django-insecure-6lf1%l*yr8@zay5hulnz^3v0ho!9+)pcoo4+80edk@y0nxqvn-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1',] 
+ALLOWED_HOSTS = ['127.0.0.1','localhost'] 
 LOGIN_URL="/login"
-
+TWEET_ACTION_OPTIONS =['like','unlike','retweet']
+MAX_TWEET_LENGTH= 240
 
 # Application definition
 
@@ -40,6 +41,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # third party
+    'rest_framework',
+    'corsheaders',
+    # internal,
     'tweets',
 ]
 
@@ -51,6 +56,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # third party
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'sample.urls'
@@ -122,8 +130,35 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    '/var/www/static/',
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR,"static-root")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CORS_ALLOW_ALL_ORIGINS=True
+CORS_URLS_REGEX = r'^/api/.*$'
+
+
+
+DEFAULT_RENDERER_CLASSES = [
+    'rest_framework.renderers.JSONRenderer',
+]
+
+if DEBUG:
+    DEFAULT_RENDERER_CLASSES += [
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES":[
+        'rest_framework.authentication.SessionAuthentication'
+        ],
+    "DEFAULT_RENDERER_CLASSES": DEFAULT_RENDERER_CLASSES
+} 
